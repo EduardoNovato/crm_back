@@ -1,18 +1,44 @@
 #!/bin/bash
 
+# Detectar sistema operativo
+OS_TYPE="$(uname -s)"
+case "$OS_TYPE" in
+    Linux*)     OS="Linux" ;;
+    Darwin*)    OS="Mac" ;;
+    CYGWIN*|MINGW*|MSYS*) OS="Windows" ;;
+    *)          OS="Desconocido" ;;
+esac
+
+echo "Sistema operativo detectado: $OS"
+
+# Detectar si usar python o python3
+if command -v python3 &>/dev/null; then
+    PYTHON_CMD="python3"
+elif command -v python &>/dev/null; then
+    PYTHON_CMD="python"
+else
+    echo "Python no está instalado. Abortando."
+    exit 1
+fi
+
 # Nombre del entorno virtual
 VENV_DIR="env"
 
-# Activar entorno virtual o crearlo si no existe
+# Crear entorno virtual si no existe
 if [ ! -d "$VENV_DIR" ]; then
     echo "Creando entorno virtual"
-    python3 -m venv "$VENV_DIR"
+    $PYTHON_CMD -m venv "$VENV_DIR"
     echo "Entorno virtual creado en '$VENV_DIR'"
 fi
 
-# Activar entorno virtual
-source "$VENV_DIR/bin/activate"
+# Activar entorno virtual según sistema
+if [ "$OS" = "Windows" ]; then
+    source "$VENV_DIR/Scripts/activate"
+else
+    source "$VENV_DIR/bin/activate"
+fi
 
+# Instalar dependencias si aún no se han instalado
 if [ ! -f "$VENV_DIR/requirements.installed" ]; then
     echo "Instalando dependencias"
     pip install --upgrade pip
@@ -21,11 +47,10 @@ if [ ! -f "$VENV_DIR/requirements.installed" ]; then
     echo "Dependencias instaladas."
 fi
 
-# Verificar si .gitignore existe, si no, crearlo
+# Verificar o crear .gitignore
 if [ ! -f ".gitignore" ]; then
-    touch .gitignore
-    echo "Archivo .gitignore creado."
-    echo "$VENV_DIR/" >> .gitignore
+    echo "Creando archivo .gitignore"
+    echo "$VENV_DIR/" > .gitignore
     echo ".env" >> .gitignore
     echo "__pycache__/" >> .gitignore
     echo "*.pyc" >> .gitignore
@@ -44,6 +69,7 @@ else
     exit 1
 fi
 
+# Definir entorno: dev o prod
 ENV=${1:-dev}
 
 if [ "$ENV" = "dev" ]; then
@@ -60,4 +86,5 @@ else
     exit 1
 fi
 
-python3 run.py
+# Ejecutar app
+$PYTHON_CMD run.py
