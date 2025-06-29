@@ -27,7 +27,8 @@ crm_back/
 │       └── validators.py
 ├── run.py
 ├── requirements.txt
-└── readme.md
+├── readme.md
+└── run.sh
 ```
 
 ## Instalación y Uso
