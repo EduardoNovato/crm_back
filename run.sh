@@ -5,7 +5,7 @@ VENV_DIR="env"
 
 # Activar entorno virtual o crearlo si no existe
 if [ ! -d "$VENV_DIR" ]; then
-    echo "Creando entorno virtual..."
+    echo "Creando entorno virtual"
     python3 -m venv "$VENV_DIR"
     echo "Entorno virtual creado en '$VENV_DIR'"
 fi
@@ -14,11 +14,26 @@ fi
 source "$VENV_DIR/bin/activate"
 
 if [ ! -f "$VENV_DIR/requirements.installed" ]; then
-    echo "Instalando dependencias..."
+    echo "Instalando dependencias"
     pip install --upgrade pip
     pip install -r requirements.txt
     touch "$VENV_DIR/requirements.installed"
     echo "Dependencias instaladas."
+fi
+
+# Verificar si .gitignore existe, si no, crearlo
+if [ ! -f ".gitignore" ]; then
+    touch .gitignore
+    echo "Archivo .gitignore creado."
+    echo "$VENV_DIR/" >> .gitignore
+    echo ".env" >> .gitignore
+    echo "__pycache__/" >> .gitignore
+    echo "*.pyc" >> .gitignore
+    echo "*.pyo" >> .gitignore
+    echo "*.pyd" >> .gitignore
+    echo "instance/" >> .gitignore
+    echo "*.db" >> .gitignore
+    echo "Archivo .gitignore creado."
 fi
 
 # Cargar variables de entorno desde .env
